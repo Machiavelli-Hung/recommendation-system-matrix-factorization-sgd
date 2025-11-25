@@ -1,0 +1,6 @@
+.venv
+src/data/Books.csv
+src/data/Ratings.csv
+src/data/Users.csv
+src/__pycache__
+src/checkpoints
