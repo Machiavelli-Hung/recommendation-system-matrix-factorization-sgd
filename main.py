@@ -65,6 +65,30 @@ def main() -> None:
     omega_val = splits["val"]
     omega_test = splits["test"]
 
+    #### See data
+    print("omega_train length =", len(omega_train))
+    print("omega_val length   =", len(omega_val))
+    print("omega_test length  =", len(omega_test))
+
+    print("\nSample 10 train rows:")
+    u, i, r = omega_train[0]
+    print("user_id:", u)
+    print("item_id:", i)
+    print("rating:", r)
+    for row in omega_train[:100]:
+        print(row)
+    print("\nSample 10 val rows:")
+    for row in omega_val[:100]:
+        print(row)
+    print("\nSample 10 test rows:")
+    for row in omega_test[:100]:
+        print(row)
+     
+    ####
+
+    ###check point 1 :return
+
+    ####
     # Initialize model
     model = MFModel(num_users=num_users, num_items=num_items, k=args.k, device=device)
 

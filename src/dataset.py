@@ -95,8 +95,8 @@ class RatingsDataset:
       - a data directory containing Book-Crossing style CSVs (Users.csv, Books.csv, Ratings.csv)
 
     Builds:
-      - dense ratings matrix M (torch.float32)
-      - Ω: list of (i, j, r) for all observed (non-zero) entries
+      - dense ratings matrix M (torch.float32): NaN for missing ratings, actual rating values (including 0) for observed entries
+      - Ω: list of (i, j, r) for all observed entries (including rating = 0, which is a valid rating)
     """
 
     csv_path_or_dir: str
@@ -145,9 +145,8 @@ class RatingsDataset:
             except ValueError:
                 # Non-numeric ratings are skipped
                 continue
-            # Keep only observed ratings (non-zero). This matches Ω definition.
-            if rating == 0.0:
-                continue
+            # Add all ratings including 0 (rating = 0 is a valid rating, not missing)
+            # Only entries not in CSV are considered missing (will be NaN in matrix)
             rows_all.append((user_id, item_id, rating))
 
         if len(rows_all) == 0:
@@ -213,12 +212,15 @@ class RatingsDataset:
         self.num_items = len(self.index_to_item_id)
 
         # Build dense M and Ω
-        self.M = torch.zeros((self.num_users, self.num_items), dtype=torch.float32)
+        # Initialize M with NaN to distinguish missing ratings from rating = 0
+        self.M = torch.full((self.num_users, self.num_items), float('nan'), dtype=torch.float32)
         self.omega: List[IndexTriple] = []
         for user_id, item_id, rating in rows:
             ui = self.user_id_to_index[user_id]
             ii = self.item_id_to_index[item_id]
+            # Set rating value (including 0, which is a valid rating)
             self.M[ui, ii] = rating
+            # Add to omega: all observed entries including rating = 0
             self.omega.append((ui, ii, rating))
 
     def train_val_test_split(

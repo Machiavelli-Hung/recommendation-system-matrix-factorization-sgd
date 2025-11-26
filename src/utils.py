@@ -12,6 +12,20 @@ IndexTriple = Tuple[int, int, float]
 
 def evaluate_rmse(model: MFModel, omega: List[IndexTriple], M: torch.Tensor, device: torch.device | None = None) -> float:
     # Ensure M and indices live on the same device as the model (or provided device)
+    # RMSE (Root Mean Squared Error) is the square root of MSE (Mean Squared Error),
+    # computed only over the known entries (Ω) of the matrix.
+    #
+    # Formula:
+    #    RMSE = sqrt( (1 / |Ω|) * Σ_{(i,j) ∈ Ω} (M_ij - M_hat_ij)^2 )
+    #
+    # Where:
+    #    M_ij      : true value at position (i,j)
+    #    M_hat_ij  : predicted value at position (i,j)
+    #    |Ω|       : number of known entries in matrix M
+    #
+    # Meaning:
+    #    - Smaller RMSE → more accurate predictions
+    #    - RMSE has the same units as the original data
     device = device if device is not None else model.A.device
     if len(omega) == 0:
         return 0.0
